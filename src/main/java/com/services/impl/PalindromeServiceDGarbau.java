@@ -26,21 +26,43 @@ public class PalindromeServiceDGarbau implements IPalindromeService {
         final List<Character> palindrome = number.chars()
             .mapToObj(c -> (char) c)
             .collect(Collectors.toList());
-        int index = 0;
-        while (number.length() / 2 > index) {
-            int rightIndex;
-            if (number.charAt(index) != number.charAt(rightIndex = number.length() - 1 - index)) {
-                palindrome.set(index, (char) Math.max(number.charAt(index), number.charAt(rightIndex)));
-                palindrome.set(rightIndex, palindrome.get(index));
-                maxAllowedChanges.getAndUpdate(value -> value - 1);
-            }
-            index++;
-        }
+
+        IntStream.rangeClosed(0, number.length())
+            .forEach(index -> {
+                int rightIndex = number.length() - 1 - index;
+                if ((number.length() / 2 > index) && (number.charAt(index) != number.charAt(rightIndex))) {
+                    palindrome.set(index, (char) Math.max(number.charAt(index), number.charAt(rightIndex)));
+                    palindrome.set(rightIndex, palindrome.get(index));
+                    maxAllowedChanges.getAndUpdate(value -> value - 1);
+                }
+            });
         return maxAllowedChanges.get() < 0 ? Optional.empty() : Optional.of(new Tuple3(number, palindrome,
             maxAllowedChanges));
     }
 
     private String reorderPalindromeWithAttendLeft(Tuple3 tuple) {
+//        IntStream.rangeClosed(0, tuple.originalNumber.length())
+//            .forEach(index -> {
+//                    int rightIndex = tuple.originalNumber.length() - 1 - index;
+//                    if ((tuple.originalNumber.length() / 2 > index) && (index == rightIndex&& tuple.maxAttempts.get() > 0)) {
+//                        tuple.palindrome.set(index, MAX_VALUE_CHAR);
+//                    }
+//                    if ((tuple.originalNumber.length() / 2 > index) && (tuple.palindrome.get(index) < MAX_VALUE_CHAR)) {
+//                        if (tuple.maxAttempts.get() >= 2
+//                            && tuple.palindrome.get(index) == tuple.originalNumber.charAt(index)
+//                            && tuple.palindrome.get(rightIndex) == tuple.originalNumber.charAt(rightIndex)) {
+//                            tuple.maxAttempts.getAndUpdate(value -> value - 2);
+//                            setMaxValue(tuple, index, rightIndex);
+//                        } else if (tuple.maxAttempts.get() >= 1
+//                            && (tuple.palindrome.get(index) != tuple.originalNumber.charAt(index)
+//                            || tuple.palindrome.get(rightIndex) != tuple.originalNumber.charAt(rightIndex))) {
+//                            tuple.maxAttempts.getAndUpdate(value -> value - 1);
+//                            setMaxValue(tuple, index, rightIndex);
+//                        }
+//                    }
+//                }
+//            );
+
         int index = 0;
         int rightIndex;
         while (index <= (rightIndex = tuple.originalNumber.length() - 1 - index)) {
@@ -48,14 +70,10 @@ public class PalindromeServiceDGarbau implements IPalindromeService {
                 tuple.palindrome.set(index, MAX_VALUE_CHAR);
             }
             if (tuple.palindrome.get(index) < MAX_VALUE_CHAR) {
-                if (tuple.maxAttempts.get() >= 2
-                    && tuple.palindrome.get(index) == tuple.originalNumber.charAt(index)
-                    && tuple.palindrome.get(rightIndex) == tuple.originalNumber.charAt(rightIndex)) {
+                if (tuple.maxAttempts.get() >= 2 && tuple.palindrome.get(index) == tuple.originalNumber.charAt(index) && tuple.palindrome.get(rightIndex) == tuple.originalNumber.charAt(rightIndex)) {
                     tuple.maxAttempts.getAndUpdate(value -> value - 2);
                     setMaxValue(tuple, index, rightIndex);
-                } else if (tuple.maxAttempts.get() >= 1
-                    && (tuple.palindrome.get(index) != tuple.originalNumber.charAt(index)
-                    || tuple.palindrome.get(rightIndex) != tuple.originalNumber.charAt(rightIndex))) {
+                } else if (tuple.maxAttempts.get() >= 1 && (tuple.palindrome.get(index) != tuple.originalNumber.charAt(index)|| tuple.palindrome.get(rightIndex) != tuple.originalNumber.charAt(rightIndex))) {
                     tuple.maxAttempts.getAndUpdate(value -> value - 1);
                     setMaxValue(tuple, index, rightIndex);
                 }
